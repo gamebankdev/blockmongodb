@@ -40,7 +40,7 @@ const request_head_block_number = async read_head_block_number => {
 
   //获取当前最新的初始合约块信息
 const requestBlockChain = async head_block_number => {
-    console.log(head_block_number)
+    //console.log(head_block_number)
     try {
       if (head_block_number > global.last_head_block_number) {
         return false;
@@ -98,7 +98,7 @@ const requestBlockChain = async head_block_number => {
   };
 
 const start_sync_func = async () => {
-  var db = await mongodb.connect(config.mongo.uri, "contract_log");
+  var db = await mongodb.connect(config.mongo.url, "contract_log");
   var last_sync_head_block_number = await db_get_global_properties("last_sync_head_block_number");
   if(last_sync_head_block_number == null ) {
     last_sync_head_block_number = {'name':"last_sync_head_block_number", 'value':0};
