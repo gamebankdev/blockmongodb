@@ -98,7 +98,7 @@ const requestBlockChain = async head_block_number => {
   };
 
 const start_sync_func = async () => {
-  var db = await mongodb.connect(config.mongo.url, "contract_log");
+  var db = await mongodb.connect(config.mongo.url, "contract_log", {autoReconnect:true,keepAlive:true});
   var last_sync_head_block_number = await db_get_global_properties("last_sync_head_block_number");
   if(last_sync_head_block_number == null ) {
     last_sync_head_block_number = {'name':"last_sync_head_block_number", 'value':0};
