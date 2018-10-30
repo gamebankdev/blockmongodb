@@ -1,0 +1,21 @@
+{
+  "apps" : [{
+    "name"        : "blockmongodb",
+    "script"      : "index.js",
+    "args"        : ["--toto=heya coco", "-d", "1"],
+    "watch"       : false,
+    "node_args"   : "--harmony",
+    "merge_logs"  : true,
+    "cwd"         : "/this/is/a/path/to/start/script",
+    "env": {
+      "NODE_ENV": "development"
+    },
+    "env_production" : {
+       "NODE_ENV": "production"
+    },
+    "env_staging" : {
+       "NODE_ENV" : "staging",
+       "TEST"     : true
+    }
+  }]
+}
