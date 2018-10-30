@@ -9,7 +9,7 @@ function mongodb_promise() {
 // 连接
 mongodb_promise.prototype.connect = (url, db_name, options) => {
     return new Promise(function(resolve, reject) {
-        MongoClient.connect(url, function(err, client) {
+        MongoClient.connect(url, options, function(err, client) {
             if (err) reject(err);
             this.mongo_client = client;
             this.mongo_db = this.mongo_client.db(db_name);

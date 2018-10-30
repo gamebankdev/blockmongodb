@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "cross-env NODE_ENV=production  node index.js"
   },
   "author": "",
   "license": "ISC",
@@ -12,6 +13,7 @@
     "axios": "^0.18.0",
     "bs58": "^4.0.1",
     "config": "^2.0.1",
+    "cross-env": "^5.2.0",
     "gamebank": "^0.1.5",
     "koa": "^2.6.1",
     "koa-body": "^4.0.4",
