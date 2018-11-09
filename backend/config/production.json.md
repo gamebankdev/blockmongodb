@@ -14,6 +14,8 @@
     "block_sync": {
       "sync_per_sec": "150",
       "resync_per_sec": "30"
-    }
+    },
+    "watch_wallet": [
+    ]
   }
 }

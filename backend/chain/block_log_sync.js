@@ -14,12 +14,12 @@ gamebank.config.set("address_prefix", config.gamebank.address_prefix);
 gamebank.config.set("chain_id", config.gamebank.chain_id);
 
 const db_get_global_properties = async (property_name,) => {
-  var property_value = await mongodb.findOne("__global_properties__", {'name':property_name});
+  let property_value = await mongodb.findOne("__global_properties__", {'name':property_name});
   return property_value;
 }
 
 const db_set_global_properties = async (property_name, property_value) => {
-  var result = await mongodb.replaceOne("__global_properties__", {'name':property_name}, {'name':property_name, 'value':property_value}, {upsert:true});
+  let result = await mongodb.replaceOne("__global_properties__", {'name':property_name}, {'name':property_name, 'value':property_value}, {upsert:true});
   return result;
 }
 
@@ -27,7 +27,7 @@ const db_set_global_properties = async (property_name, property_value) => {
 const requestBlockData = async (block_num) => {
   // console.log(block_num)
   try {
-    var formData = {
+    let formData = {
       id: 0,
       jsonrpc: "2.0",
       method: "call",
@@ -59,13 +59,16 @@ const requestBlockData = async (block_num) => {
           const { from,to,amount,memo = JSON.stringify({}) } = operationArgs;
           try {
             console.log(from,"->",to,amount,transaction_id);
-            if(to == "center_wallet"){
-              console.log(from,"->",to,amount,transaction_id); // todo
+            if(config.watch_wallet.indexOf(to) >= 0){
+              console.log("watch_wallet",from,"->",to,amount,transaction_id);
+              let insert_obj = {transaction_id:transaction_id, from:from, to:to, amount:amount, memo:memo, block_num:block_num};
+              let ret = await mongodb.insertOne("watch_wallet", insert_obj);
             }
-            let insert_obj = {transaction_id:transaction_id, from:from, to:to, amount:amount, memo:memo};
-            var ret = await mongodb.insertOne("transfer", insert_obj);
+            let insert_obj = {transaction_id:transaction_id, from:from, to:to, amount:amount, memo:memo, block_num:block_num};
+            let ret = await mongodb.insertOne("transfer", insert_obj);
           }
-          catch(e){
+          catch(e) {
+            // todo: how to check dupkey exception
             //console.log("exception", e);
             //console.log(from,"->",to,amount,transaction_id);
             console.log("sync blockerror1 block_num", block_num, "pending_sync_count", pending_sync_count,"transactionIndex",transactionIndex);
@@ -97,9 +100,10 @@ const requestBlockData = async (block_num) => {
 }
 
 const start_sync_func = async () => {
-  var db = await mongodb.connect(config.mongo.url, "block_log", {autoReconnect:true,keepAlive:true});
+  let db = await mongodb.connect(config.mongo.url, "block_log", {autoReconnect:true,keepAlive:true});
   await mongodb.createIndex("transfer",{transaction_id:1}, {unique:true});
-  var last_sync_head_block_number = await db_get_global_properties("last_sync_head_block_number");
+  await mongodb.createIndex("watch_wallet",{transaction_id:1}, {unique:true});
+  let last_sync_head_block_number = await db_get_global_properties("last_sync_head_block_number");
   if(last_sync_head_block_number == null ) {
     last_sync_head_block_number = {'name':"last_sync_head_block_number", 'value':0};
   }
@@ -131,7 +135,7 @@ const start_sync_func = async () => {
       pending_sync_count++;
       last_head_block_number = i;
     }
-    var ret = await db_set_global_properties("last_sync_head_block_number", last_head_block_number);
+    let ret = await db_set_global_properties("last_sync_head_block_number", last_head_block_number);
   }, 3000);
 }
 

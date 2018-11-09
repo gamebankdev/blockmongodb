@@ -86,7 +86,7 @@ const requestBlockData = async (block_num) => {
       	// todo: 错误的block记录一下
         //request_head_block_number(read_file_contract_number());
         console.log("sync contracterr2 block_num", block_num, "pending_sync_count", pending_sync_count);
-        console.log("err", err);
+        // console.log("err", err);
         fs.appendFile("./log/contracterr.log", block_num+"\n");
         pending_sync_count--;
         error_block_nums.push({block_num:block_num, transactionIndex:-1});
