@@ -1,24 +1,28 @@
-const MongoClient = require('mongodb').MongoClient;
+const {MongoClient} = require('mongodb');
+
 const ObjectID = require('mongodb').ObjectID;
 
 function mongodb_promise() {
+    this.mongodb = null;
     this.mongo_client = null;
     this.mongo_db = null;
 }
 
 // 连接
-mongodb_promise.prototype.connect = (url, db_name, options) => {
-    return new Promise(function(resolve, reject) {
-        MongoClient.connect(url, options, function(err, client) {
+mongodb_promise.prototype.connect = function(url, db_name, options) {
+    return new Promise( (resolve, reject) => {
+        MongoClient.connect(url, options, (err, client) => {
             if (err) reject(err);
             this.mongo_client = client;
             this.mongo_db = this.mongo_client.db(db_name);
-            resolve(mongo_db);
+            //console.log(this.mongo_db.s.databaseName);
+            //console.log("connect callback");
+            resolve(this.mongo_db);
         });
     });
 }
 
-mongodb_promise.prototype.switchdb = (db_name) => {
+mongodb_promise.prototype.switchdb = function(db_name) {
     this.mongo_db = mongo_client.db(db_name);
 }
 
@@ -34,10 +38,11 @@ mongodb_promise.prototype.close = () => {
 }
 
 // 插入方法
-mongodb_promise.prototype.insert = (collection_name, obj) => {
-    return new Promise(function(resolve, reject) {
+mongodb_promise.prototype.insert = function(collection_name, obj) {
+    return new Promise( (resolve, reject) => {
+        //console.log("insert",this.mongo_db.s.databaseName);
         const collection = this.mongo_db.collection(collection_name);
-        collection.insert(obj, {w: 1}, function(err, res) {
+        collection.insertOne(obj, {w: 1}, function(err, res) {
             if (err) reject(err);
             else resolve(res[0]);
         });
@@ -45,8 +50,8 @@ mongodb_promise.prototype.insert = (collection_name, obj) => {
 }
 
 // 更新
-mongodb_promise.prototype.update = (collection_name, obj) => {
-    return new Promise(function(resolve, reject) {
+mongodb_promise.prototype.update = function(collection_name, obj)  {
+    return new Promise( (resolve, reject) => {
         const collection = this.mongo_db.collection(collection_name);
         collection.update({_id: new ObjectID(obj._id)}, obj, {upsert: true,w: 1}, function(err, res) {
             if (err) reject(err);
@@ -56,8 +61,9 @@ mongodb_promise.prototype.update = (collection_name, obj) => {
 }
 
 // 更新
-mongodb_promise.prototype.replaceOne = (collection_name, filter, obj, options) => {
-    return new Promise(function(resolve, reject) {
+mongodb_promise.prototype.replaceOne = function(collection_name, filter, obj, options) {
+    return new Promise( (resolve, reject) => {
+        //console.log("replaceOne",this.mongo_db.s.databaseName);
         const collection = this.mongo_db.collection(collection_name);
         collection.replaceOne(filter, obj, options, function(err, res) {
             if (err) reject(err);
@@ -67,8 +73,8 @@ mongodb_promise.prototype.replaceOne = (collection_name, filter, obj, options) =
 }
 
 // 查找一个
-mongodb_promise.prototype.findOne = (collection_name, query, option) => {
-    return new Promise(function(resolve, reject) {
+mongodb_promise.prototype.findOne = function(collection_name, query, option)  {
+    return new Promise( (resolve, reject) => {
         const collection = this.mongo_db.collection(collection_name);
         if(option==undefined || option==null)
         {
@@ -86,8 +92,8 @@ mongodb_promise.prototype.findOne = (collection_name, query, option) => {
 }
 
 // 查找多个
-mongodb_promise.prototype.find = (collection_name, query, option) => {
-    return new Promise(function(resolve, reject) {
+mongodb_promise.prototype.find = function(collection_name, query, option)  {
+    return new Promise( (resolve, reject) => {
         var collection = this.mongo_db.collection(collection_name);
         if(option==undefined || option==null)
         {
@@ -105,8 +111,8 @@ mongodb_promise.prototype.find = (collection_name, query, option) => {
 }
 
 // 查找带分页
-mongodb_promise.prototype.find_page = (collection_name, query, sort, page_index, page_size) => {
-    return new Promise(function(resolve, reject) {
+mongodb_promise.prototype.find_page = function(collection_name, query, sort, page_index, page_size)  {
+    return new Promise( (resolve, reject) => {
         var collection = this.mongo_db.collection(collection_name);
         const option = {
             sort:sort,
@@ -121,8 +127,8 @@ mongodb_promise.prototype.find_page = (collection_name, query, sort, page_index,
 }
 
 // 删除
-mongodb_promise.prototype.remove = (collection_name, query) => {
-    return new Promise(function(resolve, reject) {
+mongodb_promise.prototype.remove = function(collection_name, query)  {
+    return new Promise( (resolve, reject) => {
         var collection = this.mongo_db.collection(collection_name);
         collection.remove(query, {w: 1}, function(err, res) {
             if (err) reject(err);
@@ -132,23 +138,34 @@ mongodb_promise.prototype.remove = (collection_name, query) => {
 }
 
 // 计数
-mongodb_promise.prototype.count = (collection_name, query, option) => {
-    return new Promise(function(resolve, reject) {
+mongodb_promise.prototype.count = function(collection_name, query, option) {
+    return new Promise( (resolve, reject) => {
         var collection = this.mongo_db.collection(collection_name);
         if(query==undefined || query==null)
             query = {};
         if(option==undefined || option==null)
         {
-            collection.count(query, function(err, count) {
+            collection.count(query, (err, count) => {
                 if (err) reject(err);
                 else resolve(count);
             });
         }else{
-            collection.count(query, option, function(err, count) {
+            collection.count(query, option, (err, count) => {
                 if (err) reject(err);
                 else resolve(count);
             });
         }
+    });
+}
+
+// 创建索引
+mongodb_promise.prototype.createIndex = function(collection_name, fieldOrSpec, option) {
+    return new Promise( (resolve, reject) => {
+        var collection = this.mongo_db.collection(collection_name);
+        collection.createIndex(fieldOrSpec, option, (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+        });
     });
 }
 
