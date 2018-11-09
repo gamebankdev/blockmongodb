@@ -38,7 +38,7 @@ mongodb_promise.prototype.close = () => {
 }
 
 // 插入方法
-mongodb_promise.prototype.insert = function(collection_name, obj) {
+mongodb_promise.prototype.insertOne = function(collection_name, obj) {
     return new Promise( (resolve, reject) => {
         //console.log("insert",this.mongo_db.s.databaseName);
         const collection = this.mongo_db.collection(collection_name);

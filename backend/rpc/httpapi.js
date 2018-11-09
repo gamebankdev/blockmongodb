@@ -7,6 +7,8 @@ const config = require("config").get("Config");
 const mongodb_promise = require("./../mongodb/mongodb_promise");
 const mongodb = new mongodb_promise();
 
+mongodb.id =2;
+
 router.get("/contractlog/find/:contract_name/:key/:page_index", async ctx => {
   const page_size = 50;
   //console.log("contract_name:",ctx.params.contract_name,"key",ctx.params.key,"page_index",ctx.params.page_index);
@@ -198,8 +200,10 @@ router.get("/test", async ctx => {
   ctx.status = 200;
 });
 
-const start = () => {
-  mongodb.connect(config.mongo.url, "contract_log", {autoReconnect:true,keepAlive:true});
+const start = async() => {
+  await mongodb.connect(config.mongo.url, "contract_log", {autoReconnect:true,keepAlive:true});
+  //console.log("1",mongodb.mongo_db)
+  //console.log("mongodb2",mongodb);
 }
 
 module.exports = router;
