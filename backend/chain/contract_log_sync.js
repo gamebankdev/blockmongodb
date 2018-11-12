@@ -69,7 +69,7 @@ const requestBlockData = async (block_num) => {
                 //console.log("name", name);
                 //console.log("data", data);
 		            console.log("sync contracterr1 name", name, "pending_sync_count", pending_sync_count,"transactionIndex",transactionIndex);
-            pending_sync_count--;
+                pending_sync_count--;
                 fs.appendFile("./log/contracterr.log", block_num+" "+transactionIndex+" "+transaction_id+"\n");
                 error_block_nums.push({block_num:block_num, transactionIndex:transactionIndex});
                 return false;
@@ -95,7 +95,8 @@ const requestBlockData = async (block_num) => {
   };
 
 const start_sync_func = async () => {
-  var db = await mongodb.connect(config.mongo.url, "contract_log", {autoReconnect:true,keepAlive:true});
+  console.log(config.contract_sync.contract_log_db);
+  var db = await mongodb.connect(config.mongo.url, config.contract_sync.contract_log_db, {autoReconnect:true,keepAlive:true});
   var last_sync_head_block_number = await db_get_global_properties("last_sync_head_block_number");
   if(last_sync_head_block_number == null ) {
     last_sync_head_block_number = {'name':"last_sync_head_block_number", 'value':0};

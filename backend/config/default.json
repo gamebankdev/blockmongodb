@@ -12,12 +12,21 @@
         "port": "5000"
       },
       "block_sync": {
-        "sync_per_sec": "100",
-        "resync_per_sec": "30"
+        "block_log_db": "block_log_fish",
+        "sync_per_sec": 100,
+        "resync_per_sec": 30
+      },
+      "contract_sync": {
+        "contract_log_db": "contract_log_fish",
+        "sync_per_sec": 100,
+        "resync_per_sec": 30
       },
       "watch_wallet": [
         "node1",
-        "node2"
+        "node2",
+        "user001",
+        "user002",
+        "user003"
       ]
     }
 }

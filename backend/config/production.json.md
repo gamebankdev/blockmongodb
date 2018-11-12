@@ -12,8 +12,14 @@
       "port": "5001"
     },
     "block_sync": {
-      "sync_per_sec": "150",
-      "resync_per_sec": "30"
+      "block_log_db": "block_log",
+      "sync_per_sec": 150,
+      "resync_per_sec": 30
+    },
+    "contract_sync": {
+        "contract_log_db": "contract_log",
+        "sync_per_sec": 100,
+        "resync_per_sec": 30
     },
     "watch_wallet": [
     ]

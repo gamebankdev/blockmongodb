@@ -50,10 +50,20 @@ mongodb_promise.prototype.insertOne = function(collection_name, obj) {
 }
 
 // 更新
-mongodb_promise.prototype.update = function(collection_name, obj)  {
+mongodb_promise.prototype.updateOne = function(collection_name, query, obj)  {
     return new Promise( (resolve, reject) => {
         const collection = this.mongo_db.collection(collection_name);
-        collection.update({_id: new ObjectID(obj._id)}, obj, {upsert: true,w: 1}, function(err, res) {
+        collection.updateOne(query, obj, {upsert: true,w: 1}, function(err, res) {
+            if (err) reject(err);
+            else resolve(res);
+        });
+    });
+}
+
+mongodb_promise.prototype.updateMany = function(collection_name, query, obj)  {
+    return new Promise( (resolve, reject) => {
+        const collection = this.mongo_db.collection(collection_name);
+        collection.updateMany(query, obj, {}, function(err, res) {
             if (err) reject(err);
             else resolve(res);
         });

@@ -9,6 +9,9 @@ var last_head_block_number = 0;
 var pending_sync_count = 0;
 var error_block_nums = [];
 
+var start_time = 0;
+var total_block = 0;
+
 gamebank.api.setOptions({ url: config.gamebank.server });
 gamebank.config.set("address_prefix", config.gamebank.address_prefix);
 gamebank.config.set("chain_id", config.gamebank.chain_id);
@@ -60,9 +63,9 @@ const requestBlockData = async (block_num) => {
           try {
             console.log(from,"->",to,amount,transaction_id);
             if(config.watch_wallet.indexOf(to) >= 0){
-              console.log("watch_wallet",from,"->",to,amount,transaction_id);
-              let insert_obj = {transaction_id:transaction_id, from:from, to:to, amount:amount, memo:memo, block_num:block_num};
-              let ret = await mongodb.insertOne("watch_wallet", insert_obj);
+              console.log("wallet_notify",from,"->",to,amount,transaction_id);
+              let insert_obj = {transaction_id:transaction_id, from:from, to:to, amount:amount, memo:memo, block_num:block_num, retry_count:0, status:0};
+              let ret = await mongodb.insertOne("wallet_notify", insert_obj);
             }
             let insert_obj = {transaction_id:transaction_id, from:from, to:to, amount:amount, memo:memo, block_num:block_num};
             let ret = await mongodb.insertOne("transfer", insert_obj);
@@ -82,8 +85,10 @@ const requestBlockData = async (block_num) => {
     });
     // var ret = await db_set_global_properties("last_sync_head_block_number", block_num);
     //last_head_block_number = block_num;
+    // console.log(block_num);
+    total_block++;
     if((block_num%1000) == 0){
-      console.log("block_log block_num", block_num);
+      console.log("block_log block_num", block_num,"speed", (total_block/((Date.now()-start_time)/1000)));
     }
     pending_sync_count--;
     return true;
@@ -100,9 +105,10 @@ const requestBlockData = async (block_num) => {
 }
 
 const start_sync_func = async () => {
-  let db = await mongodb.connect(config.mongo.url, "block_log", {autoReconnect:true,keepAlive:true});
+  console.log(config.block_sync.block_log_db);
+  let db = await mongodb.connect(config.mongo.url, config.block_sync.block_log_db, {autoReconnect:true,keepAlive:true});
   await mongodb.createIndex("transfer",{transaction_id:1}, {unique:true});
-  await mongodb.createIndex("watch_wallet",{transaction_id:1}, {unique:true});
+  await mongodb.createIndex("wallet_notify",{transaction_id:1}, {unique:true});
   let last_sync_head_block_number = await db_get_global_properties("last_sync_head_block_number");
   if(last_sync_head_block_number == null ) {
     last_sync_head_block_number = {'name':"last_sync_head_block_number", 'value':0};
@@ -110,33 +116,31 @@ const start_sync_func = async () => {
   console.log("block_log last_sync_head_block_number", last_sync_head_block_number.value);
   last_head_block_number = last_sync_head_block_number.value;
 
+  start_time = Date.now();
+  const { head_block_number } = await gamebank.api.getDynamicGlobalPropertiesAsync();
+
   setInterval(async () => {
     for(let i=error_block_nums.length-1,j=0; i>=0 && j<config.block_sync.resync_per_sec; i--,j++){
       console.log("resync block_log",error_block_nums[i].block_num);
-      if( requestBlockData(error_block_nums[i].block_num) == false){
-        break;
-      }
+      requestBlockData(error_block_nums[i].block_num)
       error_block_nums.splice(i,1);
       pending_sync_count++;
     }
 
-    const { head_block_number } = await gamebank.api.getDynamicGlobalPropertiesAsync();
     //console.log("get head_block_number",head_block_number,"last_head_block_number",last_head_block_number);
     let end_number = head_block_number;
-    let qps = config.block_sync.sync_per_sec/3;
+    let qps = config.block_sync.sync_per_sec;
     if(end_number - last_head_block_number > qps){
       end_number = last_head_block_number + qps;
     }
     end_number -= pending_sync_count;
     for(let i=last_head_block_number+1; i<=end_number; i++){
-      if( requestBlockData(i) == false){
-        break;
-      }
+      requestBlockData(i);
       pending_sync_count++;
       last_head_block_number = i;
     }
-    let ret = await db_set_global_properties("last_sync_head_block_number", last_head_block_number);
-  }, 3000);
+    db_set_global_properties("last_sync_head_block_number", last_head_block_number);
+  }, 1000);
 }
 
 module.exports = {
