@@ -5,6 +5,7 @@ const config = require("config").get("Config");
 const mongodb_promise = require("./../mongodb/mongodb_promise");
 const mongodb = new mongodb_promise();
 
+var cur_head_block_number = 0;
 var last_head_block_number = 0;
 var pending_sync_count = 0;
 var error_block_nums = [];
@@ -30,26 +31,15 @@ const db_set_global_properties = async (property_name, property_value) => {
 const requestBlockData = async (block_num) => {
   // console.log(block_num)
   try {
-    let formData = {
-      id: 0,
-      jsonrpc: "2.0",
-      method: "call",
-      params: ["condenser_api", "get_block", [block_num]]
-    };
-    const { data = {} } = await request({
-      url: config.gamebank.server,
-      method: "POST",
-      data: formData,
-      headers: {
-        "Content-type": "application/json"
-      }
-    });
-   
+    const data = await gamebank.api.getBlockAsync(block_num);
     let result = data.result;
     if (result == null || result == undefined) {
       result = {};
     }
     const { transactions = [] } = result;
+    if(transactions.length>0){
+      console.log("有数据啦")
+    }
 
     let transactionIndex = -1;
     transactions.forEach(transaction => {
@@ -66,9 +56,11 @@ const requestBlockData = async (block_num) => {
               console.log("wallet_notify",from,"->",to,amount,transaction_id);
               let insert_obj = {transaction_id:transaction_id, from:from, to:to, amount:amount, memo:memo, block_num:block_num, retry_count:0, status:0};
               let ret = await mongodb.insertOne("wallet_notify", insert_obj);
+              //await mongodb.replaceOne("wallet_notify", {'transaction_id':transaction_id}, insert_obj, {upsert:true});
             }
             let insert_obj = {transaction_id:transaction_id, from:from, to:to, amount:amount, memo:memo, block_num:block_num};
             let ret = await mongodb.insertOne("transfer", insert_obj);
+            //await mongodb.replaceOne("transfer", {'transaction_id':transaction_id}, insert_obj, {upsert:true});
           }
           catch(e) {
             // todo: how to check dupkey exception
@@ -76,7 +68,7 @@ const requestBlockData = async (block_num) => {
             //console.log(from,"->",to,amount,transaction_id);
             console.log("sync blockerror1 block_num", block_num, "pending_sync_count", pending_sync_count,"transactionIndex",transactionIndex);
             pending_sync_count--;
-            fs.appendFile("./log/blockerr.log", block_num+" "+transactionIndex+" "+transaction_id+"\n");
+            fs.appendFile("./log/blockerr.log", block_num+" "+transactionIndex+" "+transaction_id+"\n",function(err){});
             error_block_nums.push({block_num:block_num, transactionIndex:transactionIndex});
             return false;
           }
@@ -97,7 +89,7 @@ const requestBlockData = async (block_num) => {
     //request_head_block_number(read_file_contract_number());
     console.log("sync blockerror2 block_num", block_num, "pending_sync_count", pending_sync_count);
     //console.log("err", err);
-    fs.appendFile("./log/blockerr.log", block_num+"\n");
+    fs.appendFile("./log/blockerr.log", block_num+"\n",function(err){});
     pending_sync_count--;
     error_block_nums.push({block_num:block_num, transactionIndex:-1});
     return false;
@@ -118,7 +110,8 @@ const start_sync_func = async () => {
 
   start_time = Date.now();
   const { head_block_number } = await gamebank.api.getDynamicGlobalPropertiesAsync();
-
+  cur_head_block_number = head_block_number;
+  
   setInterval(async () => {
     for(let i=error_block_nums.length-1,j=0; i>=0 && j<config.block_sync.resync_per_sec; i--,j++){
       console.log("resync block_log",error_block_nums[i].block_num);
@@ -127,6 +120,10 @@ const start_sync_func = async () => {
       pending_sync_count++;
     }
 
+    gamebank.api.getDynamicGlobalProperties(function(err,result) {
+      cur_head_block_number = result.head_block_number;
+    });
+    let head_block_number = cur_head_block_number;
     //console.log("get head_block_number",head_block_number,"last_head_block_number",last_head_block_number);
     let end_number = head_block_number;
     let qps = config.block_sync.sync_per_sec;

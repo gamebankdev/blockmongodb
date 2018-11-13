@@ -1,7 +1,7 @@
 {
     "Config": {
       "gamebank": {
-        "server": "http://192.168.1.126:8091",
+        "server": "ws://192.168.1.126:8091",
         "address_prefix": "TST",
         "chain_id": "18dcf0a285365fc58b71f18b3d3fec954aa0c141c44e4e5cb4cf777b9eab274e"
       },
@@ -18,7 +18,7 @@
       },
       "contract_sync": {
         "contract_log_db": "contract_log_fish",
-        "sync_per_sec": 100,
+        "sync_per_sec": 5000,
         "resync_per_sec": 30
       },
       "watch_wallet": [
