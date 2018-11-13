@@ -13,13 +13,13 @@
     },
     "block_sync": {
       "block_log_db": "block_log",
-      "sync_per_sec": 1000,
-      "resync_per_sec": 30
+      "sync_per_sec": 2000,
+      "resync_per_sec": 100
     },
     "contract_sync": {
         "contract_log_db": "contract_log",
-        "sync_per_sec": 1000,
-        "resync_per_sec": 30
+        "sync_per_sec": 2000,
+        "resync_per_sec": 100
     },
     "watch_wallet": [
     ]
