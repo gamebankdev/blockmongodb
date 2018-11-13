@@ -121,9 +121,12 @@ const start_sync_func = async () => {
 
     gamebank.api.getDynamicGlobalProperties(function(err,result) {
       if(err){
-        console.log(err);
+        console.log("getDynamicGlobalProperties err",err);
       } else {
-        cur_head_block_number = result.head_block_number;
+        if(result)
+          cur_head_block_number = result.head_block_number;
+        else
+          console.error("getDynamicGlobalProperties result=null");
       }
     });
     let head_block_number = cur_head_block_number;
