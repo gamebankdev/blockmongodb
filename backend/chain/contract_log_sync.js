@@ -32,15 +32,14 @@ const requestBlockData = async (block_num) => {
     // console.log(block_num)
     try {
       const data = await gamebank.api.getContractAsync(block_num);
-      // console.log(data);
-      const result = data.result;
+      console.log(data);
+      
+      const result = data;
       if (result == null || result == undefined) {
         result = {};
       }
       const { transactions = [] } = result;
-      if(transactions.length>0){
-        console.log("有数据啦")
-      }
+
       let transactionIndex = -1;
       transactions.forEach(transaction => {
       transactionIndex++;
