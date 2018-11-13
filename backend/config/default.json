@@ -14,19 +14,20 @@
       "block_sync": {
         "block_log_db": "block_log_fish",
         "sync_per_sec": 2000,
-        "resync_per_sec": 30
+        "resync_per_sec": 100
       },
       "contract_sync": {
         "contract_log_db": "contract_log_fish",
         "sync_per_sec": 2000,
-        "resync_per_sec": 30
+        "resync_per_sec": 100
       },
       "watch_wallet": [
         "node1",
         "node2",
         "user001",
         "user002",
-        "user003"
+        "user003",
+        "threecardgm1"
       ]
     }
 }

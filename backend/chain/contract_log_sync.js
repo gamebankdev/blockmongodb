@@ -32,7 +32,7 @@ const requestBlockData = async (block_num) => {
     // console.log(block_num)
     try {
       const data = await gamebank.api.getContractAsync(block_num);
-      console.log(data);
+      // console.log(data);
       
       const result = data;
       if (result == null || result == undefined) {
