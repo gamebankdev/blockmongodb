@@ -1,0 +1,9 @@
+{
+    "apps": [
+        {
+            "name": "blockmongodb",
+            "script": "npm",
+            "args" : "start"
+        }
+    ]
+}
