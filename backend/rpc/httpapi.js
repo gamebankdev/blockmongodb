@@ -72,6 +72,21 @@ router.get("/contractlog/count/:contract_name/:key", async ctx => {
   };
   ctx.status = 200;
 });
+//查询用户下面的记录条数
+router.get("/contractlog/count/:userName/:contract_name/:key", async ctx => {
+  const {userName,contract_name,key}=ctx.params
+  var result = await mongodb.count(contract_name, {
+    key: key,
+    col4: { $all: [userName] }
+  });
+  ctx.body = {
+    code: 200,
+    data: result,
+    success: true
+  };
+  ctx.status = 200;
+});
+
 //查询用户的记录
 router.get(
   "/contractlog/find/:contract_name/:userName/:key/:page_index",
@@ -81,17 +96,17 @@ router.get(
     try {
       result = await mongodb.find_page(
         contract_name,
-        {"key": key,"col4":{$all:[userName]} },
+        { key: key, col4: { $all: [userName] } },
         { [sort]: Number(order) },
         page_index,
         50
       );
-      ctx.body= {
+      ctx.body = {
         code: 200,
         data: result,
         success: true
       };
-      ctx.status=200
+      ctx.status = 200;
     } catch (err) {
       ctx.body = {
         success: false,
