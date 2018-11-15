@@ -199,7 +199,7 @@ router.get("/test", async ctx => {
 });
 
 const start = async() => {
-  await mongodb.connect(config.mongo.url, config.block_sync.contract_log_db, {autoReconnect:true,keepAlive:true});
+  await mongodb.connect(config.mongo.url, config.contract_sync.contract_log_db, {autoReconnect:true,keepAlive:true});
   //console.log("1",mongodb.mongo_db)
   //console.log("mongodb2",mongodb);
 }
