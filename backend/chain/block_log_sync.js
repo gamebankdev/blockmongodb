@@ -53,7 +53,7 @@ const requestBlockData = async (block_num) => {
             let amountInt = parseInt( Number(amount.substr(0, amount.length-2).trim())*1000 ); // 去掉GB
             if(config.watch_wallet.indexOf(to) >= 0){
               console.log("wallet_notify",from,"->",to,amountInt,transaction_id);
-              let insert_obj = {transaction_id:transaction_id, from:from, to:to, amount:amountInt, memo:memo, block_num:block_num, retry_count:0, status:0};
+              let insert_obj = {transaction_id:transaction_id, currency:"gb", from:from, to:to, amount:amountInt, memo:memo, block_num:block_num, retry_count:0, status:0};
               let ret = await mongodb.insertOne("wallet_notify", insert_obj);
               //await mongodb.replaceOne("wallet_notify", {'transaction_id':transaction_id}, insert_obj, {upsert:true});
             }
