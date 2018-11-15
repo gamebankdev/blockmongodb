@@ -1,7 +1,5 @@
 const {MongoClient} = require('mongodb');
-
 const ObjectID = require('mongodb').ObjectID;
-
 function mongodb_promise() {
     this.mongodb = null;
     this.mongo_client = null;
@@ -10,6 +8,7 @@ function mongodb_promise() {
 
 // 连接
 mongodb_promise.prototype.connect = function(url, db_name, options) {
+console.log(url)
     return new Promise( (resolve, reject) => {
         MongoClient.connect(url, options, (err, client) => {
             if (err) reject(err);
@@ -104,6 +103,7 @@ mongodb_promise.prototype.findOne = function(collection_name, query, option)  {
 // 查找多个
 mongodb_promise.prototype.find = function(collection_name, query, option)  {
     return new Promise( (resolve, reject) => {
+       
         var collection = this.mongo_db.collection(collection_name);
         if(option==undefined || option==null)
         {
@@ -122,6 +122,7 @@ mongodb_promise.prototype.find = function(collection_name, query, option)  {
 
 // 查找带分页
 mongodb_promise.prototype.find_page = function(collection_name, query, sort, page_index, page_size)  {
+    console.log(collection_name,query)
     return new Promise( (resolve, reject) => {
         var collection = this.mongo_db.collection(collection_name);
         const option = {
