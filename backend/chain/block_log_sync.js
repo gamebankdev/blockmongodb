@@ -54,11 +54,23 @@ const requestBlockData = async (block_num) => {
             if(config.watch_wallet.indexOf(to) >= 0){
               console.log("wallet_notify",from,"->",to,amountInt,transaction_id);
               let insert_obj = {transaction_id:transaction_id, currency:"gb", from:from, to:to, amount:amountInt, memo:memo, block_num:block_num, retry_count:0, status:0};
-              let ret = await mongodb.insertOne("wallet_notify", insert_obj);
+              try {
+                let ret = await mongodb.insertOne("wallet_notify", insert_obj);
+              } catch (error) {
+                if(error.code != 11000){
+                  throw error;
+                }
+              }
               //await mongodb.replaceOne("wallet_notify", {'transaction_id':transaction_id}, insert_obj, {upsert:true});
             }
             let insert_obj = {transaction_id:transaction_id, from:from, to:to, amount:amountInt, memo:memo, block_num:block_num};
-            let ret = await mongodb.insertOne("transfer", insert_obj);
+            try {
+              let ret = await mongodb.insertOne("transfer", insert_obj);
+            } catch (error) {
+              if(error.code != 11000){
+                throw error;
+              }
+            }
             //await mongodb.replaceOne("transfer", {'transaction_id':transaction_id}, insert_obj, {upsert:true});
           }
           catch(e) {

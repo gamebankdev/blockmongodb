@@ -55,7 +55,13 @@ const requestBlockData = async (block_num) => {
                 for(var i=0; i<value.length; i++){
                   insert_obj["col"+(i+1)] = value[i];
                 }
-                var ret = await mongodb.insertOne(name, insert_obj);
+                try {
+                  var ret = await mongodb.insertOne(name, insert_obj);
+                } catch (error) {
+                  if(error.code != 11000){
+                    throw error;
+                  }
+                }
               }
               catch(e){
                 //console.log("exception", e);
@@ -104,10 +110,10 @@ const start_sync_func = async () => {
 
   setInterval(async () => {
     for(let i=error_block_nums.length-1,j=0; i>=0 && j<10; i--,j++){
-      console.log("resync contract_log",error_block_nums[i].block_num);
+      console.log("resync contract_log",error_block_nums[i].block_num,"length",error_block_nums.length);
+      pending_sync_count++;
       requestBlockData(error_block_nums[i].block_num);
       error_block_nums.splice(i,1);
-      pending_sync_count++;
     }
 
     gamebank.api.getDynamicGlobalProperties(function(err,result) {
@@ -121,8 +127,8 @@ const start_sync_func = async () => {
     }
     end_number -= pending_sync_count;
     for(let i=last_head_block_number+1; i<=end_number; i++){
-      requestBlockData(i);
       pending_sync_count++;
+      requestBlockData(i);
       last_head_block_number = i;
     }
     var ret = await db_set_global_properties("last_sync_head_block_number", last_head_block_number);
