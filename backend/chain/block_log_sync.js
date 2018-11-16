@@ -113,10 +113,10 @@ const start_sync_func = async () => {
   
   setInterval(async () => {
     for(let i=error_block_nums.length-1,j=0; i>=0 && j<config.block_sync.resync_per_sec; i--,j++){
-      console.log("resync block_log",error_block_nums[i].block_num);
+      console.log("resync block_log",error_block_nums[i].block_num,"length",error_block_nums.length);
+      pending_sync_count++;
       requestBlockData(error_block_nums[i].block_num)
       error_block_nums.splice(i,1);
-      pending_sync_count++;
     }
 
     gamebank.api.getDynamicGlobalProperties(function(err,result) {
@@ -138,8 +138,8 @@ const start_sync_func = async () => {
     }
     end_number -= pending_sync_count;
     for(let i=last_head_block_number+1; i<=end_number; i++){
-      requestBlockData(i);
       pending_sync_count++;
+      requestBlockData(i);
       last_head_block_number = i;
     }
     db_set_global_properties("last_sync_head_block_number", last_head_block_number);
